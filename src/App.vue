@@ -49,21 +49,45 @@ notes: [],
 currentNote: null,
 }
 },
-methods: {
-addNote: function (note){
-this.notes.push(note);
+
+mounted() {
+this.$http.get('notes').then(response => {
+this.notes = response.data;
+});
 },
+
+methods: {
+
+addNote: function (note){
+var newNote = {
+name: note.name,
+content: note.content,
+};
+this.$http.post('notes', newNote).then((response) => {
+this.notes.push(response.data);
+this.showAddForm = false;
+this.currentNote = response.data;
+});
+},
+
+
 showNote: function (note){
 this.currentNote = note;
 },
 showNotAddForm: function (){
 this.currentNote = null;
 },
-deleteNote: function (note){
-this.notes = this.notes.filter((n) => n !== note);
-if (this.currentNote == note){
+deleteNote: function (note) {
+this.$http.delete(`notes/${note.id}`).then(() => {
+this.showAddForm = false;
 this.currentNote = null;
-}
+this.loadNotes();
+});
+},
+loadNotes: function () {
+this.$http.get('notes').then(response => {
+this.notes = response.data;
+});
 },
 },
 }
@@ -74,6 +98,6 @@ this.currentNote = null;
 background-image: url("./assets/background.jpg");
 background-position: center;
 background-size: cover;
-min-height: 150px;
+min-height: 30%;
 }
 </style>
